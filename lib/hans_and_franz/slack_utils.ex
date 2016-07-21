@@ -30,11 +30,11 @@ defmodule HansAndFranz.SlackUtils do
   """
   def random_user_in_channel(channel_id, slack) do
     {_channel_id, channel} = slack.channels
-      |> Enum.find(fn {c_id, channel} -> c_id == channel_id end)
+      |> Enum.find(fn {c_id, _channel} -> c_id == channel_id end)
 
     if channel do
       channel.members
-      |> Enum.map(fn user_id -> SlackUtils.lookup_user(user_id, slack) end)
+      |> Enum.map(fn user_id -> lookup_user(user_id, slack) end)
       |> Enum.filter(fn item -> item end)
       |> Enum.filter(fn {_user_id, user} ->
           user.presence == "active" && user.id != slack.me.id

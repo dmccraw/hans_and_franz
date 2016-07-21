@@ -93,7 +93,6 @@ defmodule HansAndFranz.Slack do
       Regex.match?(~r/help/i, text) ->
         handle_help_message(message.channel, slack)
       Regex.match?(~r/hit me/i, text) ->
-        Apex.ap message.user
         SlackServer.schedule_next_exercise(
           message.channel,
           message.user,
