@@ -1,5 +1,8 @@
 defmodule HansAndFranz.Slack do
   use Slack
+  alias HansAndFranz.SlackUtils
+  alias HansAndFranz.Exercise
+  alias HansAndFranz.SlackServer
 
   @connect_message_wait 1000 * 60       # one minute
   @next_message_wait    1000 * 60 * 30  # 30 minutes
@@ -32,18 +35,21 @@ defmodule HansAndFranz.Slack do
   end
 
   def handle_info({:next_exercise, channel_id}, slack) do
-    exercise = HansAndFranz.Exercise.random
-    case HansAndFranz.SlackUtils.random_user_in_channel(channel_id, slack) do
-      {user_id, _user_info} ->
-        next_exercise_message(exercise, channel_id, user_id, slack)
-      _ -> true
+    if SlackUtils.is_in_office_hours do
+      exercise = Exercise.random
+      case SlackUtils.random_user_in_channel(channel_id, slack) do
+        {user_id, _user_info} ->
+          next_exercise_message(exercise, channel_id, user_id, slack)
+        _ -> true
+      end
     end
+
     next_exercise_call(channel_id)
     {:ok}
   end
 
   def handle_info({:next_exercise, channel_id, user_id}, slack) do
-    exercise = HansAndFranz.Exercise.random
+    exercise = Exercise.random
     next_exercise_message(exercise, channel_id, user_id, slack)
     next_exercise_call(channel_id)
     {:ok}
@@ -65,11 +71,11 @@ defmodule HansAndFranz.Slack do
   end
 
   defp schedule_connect_exercise({channel_id, _channel_info}) do
-    HansAndFranz.SlackServer.schedule_next_exercise(channel_id, @connect_message_wait)
+    SlackServer.schedule_next_exercise(channel_id, @connect_message_wait)
   end
 
   defp next_exercise_call(channel_id) do
-    HansAndFranz.SlackServer.schedule_next_exercise(channel_id, @next_message_wait)
+    SlackServer.schedule_next_exercise(channel_id, @next_message_wait)
   end
 
   defp next_exercise_message(exercise, channel_id, user_id, slack) do
@@ -88,7 +94,7 @@ defmodule HansAndFranz.Slack do
         handle_help_message(message.channel, slack)
       Regex.match?(~r/hit me/i, text) ->
         Apex.ap message.user
-        HansAndFranz.SlackServer.schedule_next_exercise(
+        SlackServer.schedule_next_exercise(
           message.channel,
           message.user,
           100

@@ -1,6 +1,10 @@
 defmodule HansAndFranz.SlackUtils do
   require IEx
 
+  @timezone Application.get_env(:hans_and_franz, :default_timezone, "America/Denver")
+  @office_hour_start Application.get_env(:hans_and_franz, :office_hour_start, 8)
+  @office_hour_end Application.get_env(:hans_and_franz, :office_hour_end, 8)
+
   @doc """
   find the slack channels slack.me is in
   """
@@ -30,7 +34,7 @@ defmodule HansAndFranz.SlackUtils do
 
     if channel do
       channel.members
-      |> Enum.map(fn user_id -> HansAndFranz.SlackUtils.lookup_user(user_id, slack) end)
+      |> Enum.map(fn user_id -> SlackUtils.lookup_user(user_id, slack) end)
       |> Enum.filter(fn item -> item end)
       |> Enum.filter(fn {_user_id, user} ->
           user.presence == "active" && user.id != slack.me.id
@@ -44,4 +48,14 @@ defmodule HansAndFranz.SlackUtils do
   defp random(nil), do: nil
   defp random([]), do: nil
   defp random(list), do: Enum.random(list)
+
+  def is_in_office_hours do
+    now = Timex.now(@timezone)
+    midnight = Timex.beginning_of_day(now)
+
+    office_hour_start = Timex.shift(midnight, hours: @office_hour_start)
+    office_hour_end = Timex.shift(midnight, hours: @office_hour_end)
+
+    Timex.between?(now, office_hour_start, office_hour_end)
+  end
 end

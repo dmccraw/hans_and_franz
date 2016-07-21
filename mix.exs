@@ -14,7 +14,7 @@ defmodule HansAndFranz.Mixfile do
   #
   # Type "mix help compile.app" for more information
   def application do
-    [applications: [:logger, :slack],
+    [applications: [:logger, :slack, :timex],
      mod: {HansAndFranz, []}]
   end
 
@@ -32,6 +32,7 @@ defmodule HansAndFranz.Mixfile do
       {:slack, "~> 0.7.0"},
       {:websocket_client, git: "https://github.com/jeremyong/websocket_client"},
       {:apex, "~>0.5.0"},
+      {:timex, "~> 3.0"},
     ]
   end
 end
