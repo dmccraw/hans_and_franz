@@ -7,12 +7,13 @@ defmodule HansAndFranz.SlackServer do
     GenServer.start_link(__MODULE__, self, name: __MODULE__)
   end
 
+  # user whereis on purpose so if it crashes we don't get duplicated schedule_next_exercise messages
   def schedule_next_exercise(channel_id, time) do
-    Process.send_after(__MODULE__, {:schedule_next_exercise, channel_id}, time)
+    Process.send_after(Process.whereis(__MODULE__), {:schedule_next_exercise, channel_id}, time)
   end
 
   def schedule_next_exercise(channel_id, user, time) do
-    Process.send_after(__MODULE__, {:schedule_next_exercise, channel_id, user}, time)
+    Process.send_after(Process.whereis(__MODULE__), {:schedule_next_exercise, channel_id, user}, time)
   end
 
   # GenServer callbacks
