@@ -7,13 +7,12 @@ defmodule HansAndFranz.SlackServer do
     GenServer.start_link(__MODULE__, self, name: __MODULE__)
   end
 
-  # user whereis on purpose so if it crashes we don't get duplicated schedule_next_exercise messages
-  def schedule_next_exercise(channel_id, time) do
-    Process.send_after(Process.whereis(__MODULE__), {:schedule_next_exercise, channel_id}, time)
+  def schedule_next_exercise(channel_id, milliseconds) do
+    GenServer.cast(__MODULE__, {:schedule_next_exercise, channel_id, milliseconds})
   end
 
-  def schedule_next_exercise(channel_id, user, time) do
-    Process.send_after(Process.whereis(__MODULE__), {:schedule_next_exercise, channel_id, user}, time)
+  def schedule_next_exercise(channel_id, user_id, milliseconds) do
+    GenServer.cast(__MODULE__, {:schedule_next_exercise, channel_id, user_id, milliseconds})
   end
 
   # GenServer callbacks
@@ -23,12 +22,22 @@ defmodule HansAndFranz.SlackServer do
     {:ok, %{slack_pid: slack_pid, pid: pid}}
   end
 
-  def handle_info({:schedule_next_exercise, channel_id, user_id}, %{slack_pid: slack_pid} = state) do
+  def handle_cast({:schedule_next_exercise, channel_id, milliseconds}, state) do
+    Process.send_after(self(), {:next_exercise, channel_id}, milliseconds)
+    {:noreply, state}
+  end
+
+  def handle_cast({:schedule_next_exercise, channel_id, user_id, milliseconds}, state) do
+    Process.send_after(self(), {:next_exercise, channel_id, user_id}, milliseconds)
+    {:noreply, state}
+  end
+
+  def handle_info({:next_exercise, channel_id, user_id}, %{slack_pid: slack_pid} = state) do
     send(slack_pid, {:next_exercise, channel_id, user_id})
     {:noreply, state}
   end
 
-  def handle_info({:schedule_next_exercise, channel_id}, %{slack_pid: slack_pid} = state) do
+  def handle_info({:next_exercise, channel_id}, %{slack_pid: slack_pid} = state) do
     send(slack_pid, {:next_exercise, channel_id})
     {:noreply, state}
   end
