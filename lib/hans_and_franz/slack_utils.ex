@@ -5,6 +5,7 @@ defmodule HansAndFranz.SlackUtils do
   @timezone           Application.get_env(:hans_and_franz, :default_timezone, "America/Denver")
   @office_hour_start  Application.get_env(:hans_and_franz, :office_hour_start, 8)
   @office_hour_end    Application.get_env(:hans_and_franz, :office_hour_end, 8)
+  @office_hour_days   Application.get_env(:hans_and_franz, :office_hour_days, [1,2,3,4,5])
 
   @doc """
   find the slack channels slack.me is in
@@ -59,6 +60,7 @@ defmodule HansAndFranz.SlackUtils do
 
     Logger.log :debug, "is_in_office_hours = #{Timex.between?(now, office_hour_start, office_hour_end)}"
 
-    Timex.between?(now, office_hour_start, office_hour_end)
+    Timex.between?(now, office_hour_start, office_hour_end) &&
+      Enum.member?(@office_hour_days, Timex.days_to_beginning_of_week(now))
   end
 end
