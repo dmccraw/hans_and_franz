@@ -1,5 +1,6 @@
 defmodule HansAndFranz.SlackServer do
   use GenServer
+  require Logger
 
   ## public api
 
@@ -8,10 +9,12 @@ defmodule HansAndFranz.SlackServer do
   end
 
   def schedule_next_exercise(channel_id, milliseconds) do
+    Logger.log :debug, "schedule_next_exercise #{inspect channel_id} : #{inspect milliseconds}"
     GenServer.cast(__MODULE__, {:schedule_next_exercise, channel_id, milliseconds})
   end
 
   def schedule_next_exercise(channel_id, user_id, milliseconds) do
+    Logger.log :debug, "schedule_next_exercise #{inspect channel_id} : #{inspect user_id} : #{inspect milliseconds}"
     GenServer.cast(__MODULE__, {:schedule_next_exercise, channel_id, user_id, milliseconds})
   end
 
@@ -23,21 +26,25 @@ defmodule HansAndFranz.SlackServer do
   end
 
   def handle_cast({:schedule_next_exercise, channel_id, milliseconds}, state) do
+    Logger.log :debug, "handle_cast schedule_next_exercise #{inspect channel_id} : #{inspect milliseconds}"
     Process.send_after(self(), {:next_exercise, channel_id}, milliseconds)
     {:noreply, state}
   end
 
   def handle_cast({:schedule_next_exercise, channel_id, user_id, milliseconds}, state) do
+    Logger.log :debug, "handle_cast schedule_next_exercise #{inspect channel_id} : #{inspect user_id} : #{inspect milliseconds}"
     Process.send_after(self(), {:next_exercise, channel_id, user_id}, milliseconds)
     {:noreply, state}
   end
 
   def handle_info({:next_exercise, channel_id, user_id}, %{slack_pid: slack_pid} = state) do
+    Logger.log :debug, "handle_info next_exercise #{inspect channel_id} : #{inspect user_id}"
     send(slack_pid, {:next_exercise, channel_id, user_id})
     {:noreply, state}
   end
 
   def handle_info({:next_exercise, channel_id}, %{slack_pid: slack_pid} = state) do
+    Logger.log :debug, "handle_info next_exercise #{inspect channel_id}"
     send(slack_pid, {:next_exercise, channel_id})
     {:noreply, state}
   end

@@ -1,9 +1,10 @@
 defmodule HansAndFranz.SlackUtils do
   require IEx
+  require Logger
 
-  @timezone Application.get_env(:hans_and_franz, :default_timezone, "America/Denver")
-  @office_hour_start Application.get_env(:hans_and_franz, :office_hour_start, 8)
-  @office_hour_end Application.get_env(:hans_and_franz, :office_hour_end, 8)
+  @timezone           Application.get_env(:hans_and_franz, :default_timezone, "America/Denver")
+  @office_hour_start  Application.get_env(:hans_and_franz, :office_hour_start, 8)
+  @office_hour_end    Application.get_env(:hans_and_franz, :office_hour_end, 8)
 
   @doc """
   find the slack channels slack.me is in
@@ -30,7 +31,7 @@ defmodule HansAndFranz.SlackUtils do
   """
   def random_user_in_channel(channel_id, slack) do
     {_channel_id, channel} = slack.channels
-      |> Enum.find(fn {c_id, _channel} -> c_id == channel_id end)
+    |> Enum.find(fn {c_id, _channel} -> c_id == channel_id end)
 
     if channel do
       channel.members
@@ -55,6 +56,8 @@ defmodule HansAndFranz.SlackUtils do
 
     office_hour_start = Timex.shift(midnight, hours: @office_hour_start)
     office_hour_end = Timex.shift(midnight, hours: @office_hour_end)
+
+    Logger.log :debug, "is_in_office_hours = #{Timex.between?(now, office_hour_start, office_hour_end)}"
 
     Timex.between?(now, office_hour_start, office_hour_end)
   end

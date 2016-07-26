@@ -20,7 +20,7 @@ defmodule HansAndFranz.Exercise do
         %HansAndFranz.Exercise{
           exercise: :lunges,
           count: Enum.random(Range.new(@range_start, @range_end)),
-          description: "lunges"
+          description: "forward step lunges"
         },
         %HansAndFranz.Exercise{
           exercise: :crunches,
