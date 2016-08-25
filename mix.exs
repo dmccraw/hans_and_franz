@@ -33,6 +33,7 @@ defmodule HansAndFranz.Mixfile do
       {:websocket_client, git: "https://github.com/jeremyong/websocket_client"},
       {:apex, "~>0.5.0"},
       {:timex, "~> 3.0"},
+      {:distillery, "~> 0.9"},    
     ]
   end
 end
