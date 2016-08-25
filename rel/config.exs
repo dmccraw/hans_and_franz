@@ -31,4 +31,3 @@ end
 release :hans_and_franz do
   set version: current_version(:hans_and_franz)
 end
-
