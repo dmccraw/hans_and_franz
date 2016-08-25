@@ -31,8 +31,8 @@ config :hans_and_franz, slack_token: System.get_env("HANS_AND_FRANZ_SLACK_TOKEN"
 
 config :hans_and_franz,
   default_timezone:   "America/Denver", # timezone used
-  office_hour_start:  9, # hour that messages should start
-  office_hour_end:    16, # hour that messages should end
+  office_hour_start:  8, # hour that messages should start
+  office_hour_end:    17, # hour that messages should end
   office_hour_days: [1,2,3,4,5] # 0 is sunday, 6 is saturday
 
 import_config "#{Mix.env}.exs"
