@@ -10,12 +10,14 @@ defmodule HansAndFranz.Slack do
   # slack callbacks
 
   def handle_connect(slack) do
+    Logger.debug("slack handle_connect")
     connect_exercise(slack)
   end
 
   # slack handle_message callbacks
 
   def handle_message(message = %{type: "message", text: text}, slack) do
+    Logger.debug("slack handle_message #{inspect message.type} #{inspect text}")
     cond do
       Regex.match?(~r/<@#{slack.me.id}>/, text) ->
         handle_hans_and_franz_message(message, text, slack)
@@ -23,18 +25,21 @@ defmodule HansAndFranz.Slack do
     end
   end
 
-  def handle_message(_message, _slack) do
+  def handle_message(message, _slack) do
+    Logger.debug("slack handle_message #{inspect message.type}")
     {:ok}
   end
 
   # slack handle_info callbacks
 
-  def handle_info({:message, text, channel}, slack) do
-    send_message(text, channel, slack)
+  def handle_info({:message, text, channel_id}, slack) do
+    Logger.debug("slack handle_info #{inspect text} #{inspect channel_id}")
+    send_message(text, channel_id, slack)
     {:ok}
   end
 
   def handle_info({:next_exercise, channel_id}, slack) do
+    Logger.debug("slack handle_info :next_exercise #{inspect channel_id}")
     if SlackUtils.is_in_office_hours do
       exercise = Exercise.random
       case SlackUtils.random_user_in_channel(channel_id, slack) do
@@ -49,13 +54,15 @@ defmodule HansAndFranz.Slack do
   end
 
   def handle_info({:next_exercise, channel_id, user_id}, slack) do
+    Logger.debug("slack handle_info :next_exercise #{inspect channel_id} #{inspect user_id}")
     exercise = Exercise.random
     next_exercise_message(exercise, channel_id, user_id, slack)
     next_exercise_call(channel_id)
     {:ok}
   end
 
-  def handle_info(_, _slack) do
+  def handle_info(message, _slack) do
+    Logger.debug("slack handle_info #{inspect message}")
     {:ok}
   end
 
